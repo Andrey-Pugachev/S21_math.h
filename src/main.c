@@ -29,21 +29,21 @@ long double s21_pow(double base, double exp);
 // //Вычисляет аргтангенс (получает на вход угол заданный в радианах).
 long double s21_atan(double x);
 // //Вычисляет арксинус (получает на вход угол заданный в радианах).
-// //long double s21_asin(double x);
+long double s21_asin(double x);
 // //Вычисляет арккосинус (получает на вход угол заданный в радианах).
-// //long double s21_acos(double x);
+long double s21_acos(double x);
 // //Вычисляет синус (получает на вход угол заданный в радианах).
 long double s21_sin(double x);
 // //Вычисляет косинус (получает на вход угол заданный в радианах).
 long double s21_cos(double x);
 // //Вычисляет тангенс (получает на вход угол заданный в радианах).
-// long double s21_tan(double x);
+long double s21_tan(double x);
 
 int main() {
     double x;
     scanf("%lf", &x);
-    printf("%Lf    s21\n", s21_cos(x));
-    printf("%f    math\n", cos(x));
+    printf("%Lf    s21\n", s21_acos(x));
+    printf("%f    math\n", acos(x));
     return 0;
 }
 
@@ -358,17 +358,46 @@ long double s21_atan(double x) {
     return result;
 }
 
-// long double s21_asin(double x) {
+long double s21_asin(double x) {
+    if (x == 1.)
+        return S21_PI / 2;
+    if (x == -1.)
+        return -S21_PI / 2;
+    if (x == 0.7071067811865475244)
+        return S21_PI / 4;
+    if (x == -0.7071067811865475244)
+        return -S21_PI / 4;
+    long double result = 0.;
+    if (-1. < x && x < 1.)
+        result = s21_atan(x / s21_sqrt(1 - x * x));
+    else
+        return S21_NAN;
+    return result;
+}
 
-//     return;
-// }
-
-// long double s21_acos(double x) {
-
-//     return;
-// }
+long double s21_acos(double x) {
+    if (x == 1.)
+        return 0;
+    if (x == -1.)
+        return S21_PI;
+    if (x == 0)
+        return S21_PI / 2;
+    if (x == 0.7071067811865475244)
+        return S21_PI / 4;
+    if (x == -0.7071067811865475244)
+        return 3 * S21_PI / 4;
+    long double result = 0.;
+    if (0. < x && x < 1.)
+        result = s21_atan(s21_sqrt(1 - x * x) / x);
+    else if (-1. < x && x < 0.)
+        result = S21_PI + s21_atan(s21_sqrt(1 - x * x) / x);
+    else
+        return S21_NAN;
+    return result;
+}
 
 long double s21_sin(double x) {
+    int sign = 1;
     long double result = 0;
     if (x == S21_NAN || x == -S21_INF || x == S21_INF)
         return S21_NAN;
@@ -378,31 +407,58 @@ long double s21_sin(double x) {
         else
             x += 2 * S21_PI;
     }
+    if (x < 0) {
+        x = -x;
+        sign = -1;
+    }
     for (int i = 0; i < 150; i++) { //колличество итерацый задаём не более 150 иначе функцыя ломается
         result += s21_pow(-1, i) * s21_pow(x, 1 + 2 * i) / s21_factorial(1 + 2 * i);
     }
-    return result;
+    return result * sign;
 }
 
-long double s21_cos(double x) {
-    long double result = 0;
-    for (; x > 2 * S21_PI || x < -2 * S21_PI;) {
-        if (x > 2 * S21_PI)
-            x -= 2 * S21_PI;
-        else
-            x += 2 * S21_PI;
-    }
-    if (x < 0)
-    x = -x;
-    for (int i = 0; i < 10; i++) {
-        result += s21_pow(-1, i) * s21_pow(x, 2 * i) / s21_factorial(2 * i);
-    }
-    return result;
-}
-
-// long double s21_tan(double x) {
-//     return s21_sin(x) / s21_cos(x);
+// long double s21_cos(double x) {
+//     long double result = 0;
+//     if (x == S21_NAN || x == -S21_INF || x == S21_INF)
+//         return S21_NAN;
+//     for (; x < -2 * S21_PI || 2 * S21_PI < x;) {
+//         if (x > 2 * S21_PI)
+//             x -= 2 * S21_PI;
+//         else
+//             x += 2 * S21_PI;
+//     }
+//     if (x < 0)
+//         x = -x;
+//     for (int i = 0; i < 150; i++)
+//         result += s21_pow(-1, i) * s21_pow(x, 2 * i) / s21_factorial(2 * i);
+//     return result;
 // }
+// Рабочая функция для cos() ПОПРОСИТЬ ДАНЮ ОБЪЯСНИТЬ РЕШЕНИЕ!!!!!!!!!!!!!
+long double s21_cos(double x) {
+  long double member, answer;
+  x = s21_fmod(x, 2 * S21_PI);
+  member = 1;
+  answer = 1;
+  if (s21_fabs(x) < S21_PRECISION) {
+    answer = 1.;
+  } else {
+    for (long double i = 1.; s21_fabs(member) > S21_PRECISION && i < 50; i++) {
+      member *= ((-1.) * x * x / (2. * i * (2. * i - 1.)));
+      answer += member;
+    }
+  }
+  return answer;
+}
+
+long double s21_tan(double x) {
+    if (x == S21_PI / 2)
+        return 16331239353195370L;
+    else if (x == -S21_PI / 2)
+        return -16331239353195370L;
+    if (x == 0)
+        return 0;
+    return s21_sin(x) / s21_cos(x);
+}
 
 
 
